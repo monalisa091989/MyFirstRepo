@@ -1,0 +1,130 @@
+VPC LAB
+
+	create VPC
+	Provide Name : sampleVPC
+	IPV4 CIDR block : 10.0.0.0/16
+	Select IPV6
+	Default Tenancy
+
+Action steps :
+	No new subnets
+	new route table
+	No internet gateway
+	new default ACL
+	new security group
+
+Create Subnet 
+	provide name - 10.0.1.0-us-east-1a
+	Select created VPC
+	select an availability zone
+	IPV4 CIDR block : 10.0.1.0/24
+
+	only 251 ip address are allocated
+	
+	reseved aws vpc ipaddress
+	
+Create Subnet 
+	provide name - 10.0.2.0-us-east-1b
+	Select created VPC
+	select an availability zone
+	IPV4 CIDR block : 10.0.2.0/24
+
+Create internet gateway
+	provide name
+	by default the internet gateway is detached
+	Attach this internet gateway to the VPC
+
+GOTO route table
+
+create new route table
+	provide name
+	select appropriate VPC
+	
+	enable internet access
+	=> goto routes tab => Add another route
+	"0.0.0.0/0" for ipv4 => target - created internet gateway
+	"::/0" for ipv6 => target - created internet gateway
+	
+	=> goto subnet associations tab => select (10.0.1.0) the subnet
+
+	
+testing the Access within subnet and outside subnet
+=> goto subnet => select 10.0.1.0 and enable auto assign IP settings
+
+
+Create EC2 => Amazon linux => t2 micro => In network section select "newly created VPC"
+=>  select 10.0.1.0 subnet => Auto assign public IP (enabled to subnet)
+
+Create a new security group for this VPC and provide access to SSH and HTTP
+
+
+Create EC2 => Amazon linux => t2 micro => In network section select "newly created VPC"
+=>  select 10.0.2.0 subnet => Auto assign public IP (disabled to subnet)
+
+select default security group
+This machine will not be have public ip address
+
+connect to the first machine using putty "ec2-user@public-ip" 
+checking if internet is working
+sudo su
+yum update -y - to update operation system
+
+------------------------------------------------------------------------------------
+
+Create a new security group
+	provide name : Manyprotocol
+	add inbound rules for 
+		SSH
+		MYSQL
+		HTTP
+		HTTPs
+	with source as custom => 10.0.1.0/24
+
+goto the second EC2 instance and change the security group to the new group
+
+SSH to server 1 
+Ping the private server via private IP
+
+SSH to server 2 using server 1
+Open pem file and copy the private key
+nano mypv.pem
+paste the copied content
+Ctrl + X => Y
+
+provide permission for the key file
+chmod 400 mypv.pem
+
+ssh ec2-user@private-ip -i mypv.pem
+
+sudo su
+yum update -y
+
+no internet in private machine 
+----------------------------
+
+need to provide internet to the private machine
+
+create a NAT instance => vpc-nat-hvm => t3 micro => select vpc => public subnet (10.0.1.0)
+select myvpcsg with ssh, http/https (0.0.0.0/0 ::/0) => launch instance
+
+Select the nat instance => actions => networking => change source/destination check => disable
+
+route table => select the default route table 
+edit route => add route destination : 0.0.0.0/0 target: nat instance
+Save the changes
+
+now login to public instance and then to private instance
+
+yum update -y
+
+NAT gateway
+
+create NAT GATEway
+select public subnet in myVpc
+create new elastic IP address
+
+once the NAT gateway is available
+=> goto the same route table => change the NAT instance to NAT gateway => save changes
+
+
+nat instance vs nat gateway
