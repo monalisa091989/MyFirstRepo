@@ -1,0 +1,21 @@
+aws mail id:
+---------------------
+monaawstraining@gmail.com
+Mona@1234
+
+
+IAM user
+===========
+Mona
+Mona@1234
+
+
+rds pswd:
+mona12345
+
+
+gitHub:
+-----------
+Username: monalisa091989
+Pswd: uid@12345
+MonaRepo : github and local repository
